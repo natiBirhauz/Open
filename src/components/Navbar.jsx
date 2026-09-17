@@ -1,12 +1,10 @@
 import React from 'react';
-import { Wine, Map, List, Columns, RefreshCw, Radio } from 'lucide-react';
+import { Wine, RefreshCw } from 'lucide-react';
 import SurpriseRoulette from './SurpriseRoulette';
 
 export default function Navbar({
   venues,
   onPickRandom,
-  viewMode, // 'split' | 'map' | 'list'
-  onChangeViewMode,
   onSyncLiveData,
   isSyncing,
   totalVenuesCount
@@ -78,34 +76,6 @@ export default function Navbar({
             {totalVenuesCount.toLocaleString()} ברים, מועדונים ומסעדות בזמן אמת
           </div>
         </div>
-      </div>
-
-      {/* View Mode Switcher (Desktop & Tablet) */}
-      <div className="view-mode-pill">
-        <button
-          onClick={() => onChangeViewMode('split')}
-          className={viewMode === 'split' ? 'active' : ''}
-          title="תצוגה מפוצלת: מפה + רשימה"
-        >
-          <Columns size={13} />
-          <span>מפוצל</span>
-        </button>
-        <button
-          onClick={() => onChangeViewMode('map')}
-          className={viewMode === 'map' ? 'active' : ''}
-          title="תצוגת מפה מלאה"
-        >
-          <Map size={13} />
-          <span>מפה בלבד</span>
-        </button>
-        <button
-          onClick={() => onChangeViewMode('list')}
-          className={viewMode === 'list' ? 'active' : ''}
-          title="תצוגת רשימה בלבד"
-        >
-          <List size={13} />
-          <span>רשימה</span>
-        </button>
       </div>
 
       {/* Right Actions: Live Sync, Roulette, Favorites */}

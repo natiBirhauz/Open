@@ -23,8 +23,7 @@ export default function App() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
 
-  // View mode: 'split' (map + feed) | 'map' (full map) | 'list' (feed only)
-  const [viewMode, setViewMode] = useState('split');
+
 
   // Search and basic filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -271,17 +270,10 @@ export default function App() {
   // Show venue on map
   const handleShowOnMap = (venue) => {
     setMapTargetVenue(venue);
-    if (window.innerWidth <= 900) {
-      setViewMode('map');
-    }
   };
 
-  // Dynamic layout class
-  const layoutClass = `
-    ${viewMode === 'map' ? 'view-map-only mobile-map-only' : ''}
-    ${viewMode === 'list' ? 'view-list-only mobile-list-only' : ''}
-    ${viewMode === 'split' ? 'mobile-split' : ''}
-  `.trim();
+  // Always split layout
+  const layoutClass = 'mobile-split';
 
   return (
     <div className={`app-container ${layoutClass}`}>
@@ -292,8 +284,6 @@ export default function App() {
       <Navbar
         venues={filteredVenues}
         onPickRandom={handlePickRandom}
-        viewMode={viewMode}
-        onChangeViewMode={setViewMode}
         onSyncLiveData={handleSyncLiveData}
         isSyncing={isSyncing}
         totalVenuesCount={allVenues.length}

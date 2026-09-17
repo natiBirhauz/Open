@@ -47,24 +47,13 @@
   overflow: hidden;
 }
 
-/* Full Map View Mode */
-.view-map-only .feed-column {
-  display: none !important;
-}
-.view-map-only .map-column {
-  width: 100% !important;
-  padding: 0 !important;
-}
-
-/* Full List View Mode */
-.view-list-only .map-column {
-  display: none !important;
-}
-.view-list-only .feed-column {
-  width: 100% !important;
-  max-width: 900px;
-  margin: 0 auto;
-  border-left: none;
+/* Permanent Split View Layout */
+.main-content {
+  flex: 1;
+  display: flex;
+  height: calc(100vh - 68px);
+  overflow: hidden;
+  position: relative;
 }
 
 /* Venue Cards Grid */
