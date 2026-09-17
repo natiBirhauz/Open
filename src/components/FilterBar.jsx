@@ -20,8 +20,8 @@ import {
   RotateCcw,
   Navigation,
   Star,
-  Compass,
-  ArrowRight
+  ChevronDown,
+  Check
 } from 'lucide-react';
 import { CITIES, CATEGORIES } from '../data/venuesData';
 import { findLocationCoordinates } from '../services/venuesApi';
@@ -63,18 +63,18 @@ export default function FilterBar({
   onResetAllFilters
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [locationInput, setLocationInput] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState('');
-  const [citySearchTerm, setCitySearchTerm] = useState('');
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
 
-  const filteredCities = useMemo(() => {
-    if (!citySearchTerm.trim()) return CITIES;
-    const term = citySearchTerm.trim().toLowerCase();
-    return CITIES.filter(
-      (c) => c.name.toLowerCase().includes(term) || c.shortName.toLowerCase().includes(term) || c.id === 'all'
-    );
-  }, [citySearchTerm]);
+  const activeCityObj = useMemo(() => {
+    return CITIES.find((c) => c.id === activeCityId) || CITIES[0];
+  }, [activeCityId]);
+
+  const activeCategoryObj = useMemo(() => {
+    return CATEGORIES.find((c) => c.id === activeCategory) || CATEGORIES[0];
+  }, [activeCategory]);
 
   const categoryIcons = {
     all: Sparkles,
@@ -122,28 +122,7 @@ export default function FilterBar({
     );
   };
 
-  // Address search handler
-  const handleSearchLocation = async (e) => {
-    if (e) e.preventDefault();
-    if (!locationInput.trim()) return;
 
-    setIsLocating(true);
-    setLocationError('');
-    try {
-      const coords = await findLocationCoordinates(locationInput);
-      if (coords) {
-        activateLocation(coords);
-        setLocationInput('');
-      } else {
-        setLocationError('הכתובת לא נמצאה, נסה עיר או רחוב מוכרים');
-        setTimeout(() => setLocationError(''), 4000);
-      }
-    } catch (err) {
-      setLocationError('שגיאה באיתור הכתובת');
-    } finally {
-      setIsLocating(false);
-    }
-  };
 
   // Main search submit handler (geocodes address if typed into search bar)
   const handleMainSearchSubmit = async (e) => {
@@ -283,7 +262,263 @@ export default function FilterBar({
         </button>
       </div>
 
-      {/* 2. WHERE ARE YOU / DISTANCE FILTER SECTION ("איפה אתה ולמצוא מה קרוב אליך") */}
+      {/* 2. DROPDOWN FILTERS: מקום בארץ + סוג הבילוי */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        {/* Dropdown 1: סינון לפי מקום בארץ */}
+        <div style={{ position: 'relative', flex: 1 }}>
+          <button
+            type="button"
+            onClick={() => {
+              setIsCityDropdownOpen((prev) => !prev);
+              setIsCategoryDropdownOpen(false);
+            }}
+            style={{
+              width: '100%',
+              background: activeCityId !== 'all' ? 'rgba(168, 85, 247, 0.18)' : 'rgba(255, 255, 255, 0.05)',
+              border: activeCityId !== 'all' ? '1px solid var(--neon-purple)' : '1px solid var(--border-subtle)',
+              color: activeCityId !== 'all' ? '#fff' : 'var(--text-secondary)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '9px 12px',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 6,
+              transition: 'all 0.2s ease',
+              boxShadow: activeCityId !== 'all' ? '0 0 12px rgba(168, 85, 247, 0.25)' : 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+              <MapPin size={13} color={activeCityId !== 'all' ? 'var(--neon-purple)' : 'var(--neon-cyan)'} />
+              <span style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {activeCityId === 'all' ? 'סינון לפי מקום בארץ 📍' : activeCityObj.name}
+              </span>
+            </div>
+            <ChevronDown size={13} style={{ transform: isCityDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+          </button>
+
+          {/* City Dropdown Menu */}
+          {isCityDropdownOpen && (
+            <>
+              <div onClick={() => setIsCityDropdownOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  left: 0,
+                  marginTop: 4,
+                  maxHeight: '270px',
+                  overflowY: 'auto',
+                  background: 'rgba(15, 20, 32, 0.98)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(168, 85, 247, 0.45)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: '0 12px 32px rgba(0, 0, 0, 0.8), var(--glow-purple)',
+                  zIndex: 999,
+                  padding: '6px'
+                }}
+              >
+                {CITIES.map((city) => {
+                  const isSelected = activeCityId === city.id;
+                  return (
+                    <button
+                      key={city.id}
+                      type="button"
+                      onClick={() => {
+                        onSelectCity(city.id);
+                        setIsCityDropdownOpen(false);
+                      }}
+                      style={{
+                        width: '100%',
+                        background: isSelected ? 'rgba(168, 85, 247, 0.25)' : 'transparent',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '8px 10px',
+                        color: isSelected ? '#fff' : 'var(--text-secondary)',
+                        fontSize: '12px',
+                        fontWeight: isSelected ? 700 : 500,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        textAlign: 'right',
+                        transition: 'background 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <MapPin size={12} color={isSelected ? 'var(--neon-purple)' : 'var(--text-muted)'} />
+                        <span>{city.name}</span>
+                      </div>
+                      {isSelected && <Check size={13} color="var(--neon-purple)" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Dropdown 2: סינון סוג הבילוי */}
+        <div style={{ position: 'relative', flex: 1 }}>
+          <button
+            type="button"
+            onClick={() => {
+              setIsCategoryDropdownOpen((prev) => !prev);
+              setIsCityDropdownOpen(false);
+            }}
+            style={{
+              width: '100%',
+              background: activeCategory !== 'all' ? 'rgba(6, 182, 212, 0.18)' : 'rgba(255, 255, 255, 0.05)',
+              border: activeCategory !== 'all' ? '1px solid var(--neon-cyan)' : '1px solid var(--border-subtle)',
+              color: activeCategory !== 'all' ? '#fff' : 'var(--text-secondary)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '9px 12px',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 6,
+              transition: 'all 0.2s ease',
+              boxShadow: activeCategory !== 'all' ? '0 0 12px rgba(6, 182, 212, 0.25)' : 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+              <Sparkles size={13} color={activeCategory !== 'all' ? 'var(--neon-cyan)' : 'var(--text-muted)'} />
+              <span style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {activeCategory === 'all' ? 'סינון סוג הבילוי 🍸' : activeCategoryObj.label}
+              </span>
+            </div>
+            <ChevronDown size={13} style={{ transform: isCategoryDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+          </button>
+
+          {/* Category Dropdown Menu */}
+          {isCategoryDropdownOpen && (
+            <>
+              <div onClick={() => setIsCategoryDropdownOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 998 }} />
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  left: 0,
+                  marginTop: 4,
+                  maxHeight: '270px',
+                  overflowY: 'auto',
+                  background: 'rgba(15, 20, 32, 0.98)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(6, 182, 212, 0.45)',
+                  borderRadius: 'var(--radius-md)',
+                  boxShadow: '0 12px 32px rgba(0, 0, 0, 0.8), var(--glow-cyan)',
+                  zIndex: 999,
+                  padding: '6px'
+                }}
+              >
+                {CATEGORIES.map((cat) => {
+                  const isSelected = activeCategory === cat.id;
+                  const Icon = categoryIcons[cat.id] || Sparkles;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        onSelectCategory(cat.id);
+                        setIsCategoryDropdownOpen(false);
+                      }}
+                      style={{
+                        width: '100%',
+                        background: isSelected ? 'rgba(6, 182, 212, 0.25)' : 'transparent',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '8px 10px',
+                        color: isSelected ? '#fff' : 'var(--text-secondary)',
+                        fontSize: '12px',
+                        fontWeight: isSelected ? 700 : 500,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        textAlign: 'right',
+                        transition: 'background 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                        <Icon size={13} color={isSelected ? 'var(--neon-cyan)' : 'var(--text-muted)'} />
+                        <span>{cat.label}</span>
+                      </div>
+                      {isSelected && <Check size={13} color="var(--neon-cyan)" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* GPS Proximity / Clear Location */}
+        {userLocation ? (
+          <button
+            type="button"
+            onClick={() => onSetUserLocation && onSetUserLocation(null)}
+            title="בטל סינון לפי מיקום נוכחי"
+            style={{
+              background: 'rgba(6, 182, 212, 0.15)',
+              border: '1px solid var(--neon-cyan)',
+              color: 'var(--neon-cyan)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '9px 12px',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <Navigation size={13} className="animate-pulse" />
+            <span>סביבי ({userLocation.name.slice(0, 10)}) ✕</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleUseGPS}
+            disabled={isLocating}
+            title="סנן מקומות קרובים אליי באמצעות GPS"
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-secondary)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '9px 12px',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: isLocating ? 'wait' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Navigation size={13} className={isLocating ? 'animate-spin' : ''} />
+            <span>{isLocating ? 'מאתר...' : 'מה קרוב אליי? 📍'}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Location Error Message */}
+      {locationError && (
+        <div style={{ fontSize: '11px', color: 'var(--neon-pink)', fontWeight: 600 }}>
+          {locationError}
+        </div>
+      )}
+
+      {/* Distance Slider */}
       <div
         style={{
           background: userLocation ? 'rgba(6, 182, 212, 0.08)' : 'rgba(15, 20, 32, 0.65)',
@@ -292,199 +527,89 @@ export default function FilterBar({
           padding: '10px 12px',
           display: 'flex',
           flexDirection: 'column',
-          gap: 8,
-          transition: 'all 0.3s ease'
+          gap: 6
         }}
       >
-        {/* Top row of Location: Active State OR Input */}
-        {userLocation ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--neon-cyan)', fontWeight: 800, fontSize: '12.5px' }}>
-              <Navigation size={14} className="animate-pulse" />
-              <span>המיקום שלך: {userLocation.name}</span>
-            </div>
-            <button
-              onClick={() => {
-                if (onSetUserLocation) onSetUserLocation(null);
-              }}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: 600 }}>רדיוס מרחק:</span>
+            <span
               style={{
-                background: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid var(--border-subtle)',
-                color: 'var(--text-secondary)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '3px 8px',
-                fontSize: '11px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4
-              }}
-            >
-              <X size={12} />
-              <span>בטל מיקום</span>
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSearchLocation} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            {/* GPS Button */}
-            <button
-              type="button"
-              onClick={handleUseGPS}
-              disabled={isLocating}
-              title="זהה מיקום נוכחי באמצעות GPS"
-              style={{
-                background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(59, 130, 246, 0.25))',
-                border: '1px solid var(--neon-cyan)',
-                color: 'var(--neon-cyan)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '7px 11px',
-                fontSize: '11.5px',
-                fontWeight: 700,
-                cursor: isLocating ? 'wait' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <Navigation size={13} className={isLocating ? 'animate-spin' : ''} />
-              <span>{isLocating ? 'מאתר...' : '📍 מה קרוב אליי?'}</span>
-            </button>
-
-            {/* Free Address Input */}
-            <div
-              style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '0 8px'
-              }}
-            >
-              <input
-                type="text"
-                value={locationInput}
-                onChange={(e) => setLocationInput(e.target.value)}
-                placeholder="או רשום כתובת / שכונה..."
-                style={{
-                  width: '100%',
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  color: 'var(--text-primary)',
-                  fontSize: '11.5px',
-                  fontFamily: 'var(--font-main)',
-                  padding: '6px 0',
-                  direction: 'rtl'
-                }}
-              />
-              <button
-                type="submit"
-                disabled={!locationInput.trim() || isLocating}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: locationInput.trim() ? 'var(--neon-cyan)' : 'var(--text-muted)',
-                  cursor: locationInput.trim() ? 'pointer' : 'default',
-                  padding: '2px 4px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <ArrowRight size={13} style={{ transform: 'rotate(180deg)' }} />
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* Location Error Message */}
-        {locationError && (
-          <div style={{ fontSize: '11px', color: 'var(--neon-pink)', fontWeight: 600 }}>
-            {locationError}
-          </div>
-        )}
-
-        {/* Distance Range Slidebar up to 40 km */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%', marginTop: 2 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: 600 }}>רדיוס מרחק:</span>
-              <span style={{
                 fontSize: '12.5px',
                 fontWeight: 800,
                 color: 'var(--neon-cyan)',
                 textShadow: '0 0 10px rgba(6, 182, 212, 0.5)'
-              }}>
-                {maxDistance === 'all' || !maxDistance ? 'עד 40 ק״מ (כל האזור)' : `עד ${maxDistance} ק״מ`}
-              </span>
-            </div>
-            {userLocation && (
-              <span style={{ fontSize: '10.5px', color: '#94a3b8', fontWeight: 500 }}>
-                מסנן בזמן אמת לפי מיקומך
-              </span>
-            )}
-          </div>
-
-          <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
-            <input
-              type="range"
-              min="1"
-              max="40"
-              step="1"
-              value={maxDistance === 'all' || !maxDistance ? 40 : parseFloat(maxDistance)}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (onSelectMaxDistance) onSelectMaxDistance(val);
               }}
-              className="custom-slidebar custom-slidebar-cyan"
-              style={{
-                width: '100%',
-                cursor: 'pointer',
-                accentColor: 'var(--neon-cyan)'
-              }}
-            />
+            >
+              {maxDistance === 'all' || !maxDistance ? 'עד 40 ק״מ (כל הארץ)' : `עד ${maxDistance} ק״מ`}
+            </span>
           </div>
+          {userLocation && (
+            <span style={{ fontSize: '10.5px', color: '#94a3b8', fontWeight: 500 }}>
+              מסנן בזמן אמת לפי מיקומך
+            </span>
+          )}
+        </div>
 
-          <div style={{
+        <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
+          <input
+            type="range"
+            min="1"
+            max="40"
+            step="1"
+            value={maxDistance === 'all' || !maxDistance ? 40 : parseFloat(maxDistance)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (onSelectMaxDistance) onSelectMaxDistance(val);
+            }}
+            className="custom-slidebar custom-slidebar-cyan"
+            style={{
+              width: '100%',
+              cursor: 'pointer',
+              accentColor: 'var(--neon-cyan)'
+            }}
+          />
+        </div>
+
+        <div
+          style={{
             display: 'flex',
             justifyContent: 'space-between',
             fontSize: '10px',
             color: 'var(--text-muted)',
             padding: '0 2px'
-          }}>
-            <span
-              style={{ cursor: 'pointer', color: maxDistance === '1' ? 'var(--neon-cyan)' : 'inherit', fontWeight: maxDistance === '1' ? 800 : 500 }}
-              onClick={() => onSelectMaxDistance && onSelectMaxDistance('1')}
-            >
-              1 ק״מ
-            </span>
-            <span
-              style={{ cursor: 'pointer', color: maxDistance === '5' ? 'var(--neon-cyan)' : 'inherit', fontWeight: maxDistance === '5' ? 800 : 500 }}
-              onClick={() => onSelectMaxDistance && onSelectMaxDistance('5')}
-            >
-              5 ק״מ
-            </span>
-            <span
-              style={{ cursor: 'pointer', color: maxDistance === '15' ? 'var(--neon-cyan)' : 'inherit', fontWeight: maxDistance === '15' ? 800 : 500 }}
-              onClick={() => onSelectMaxDistance && onSelectMaxDistance('15')}
-            >
-              15 ק״מ
-            </span>
-            <span
-              style={{ cursor: 'pointer', color: maxDistance === '25' ? 'var(--neon-cyan)' : 'inherit', fontWeight: maxDistance === '25' ? 800 : 500 }}
-              onClick={() => onSelectMaxDistance && onSelectMaxDistance('25')}
-            >
-              25 ק״מ
-            </span>
-            <span
-              style={{ cursor: 'pointer', color: (maxDistance === '40' || maxDistance === 'all') ? 'var(--neon-cyan)' : 'inherit', fontWeight: (maxDistance === '40' || maxDistance === 'all') ? 800 : 500 }}
-              onClick={() => onSelectMaxDistance && onSelectMaxDistance('40')}
-            >
-              40 ק״מ
-            </span>
-          </div>
+          }}
+        >
+          <span
+            style={{ cursor: 'pointer', color: maxDistance === '1' ? 'var(--neon-cyan)' : 'inherit', fontWeight: maxDistance === '1' ? 800 : 500 }}
+            onClick={() => onSelectMaxDistance && onSelectMaxDistance('1')}
+          >
+            1 ק״מ
+          </span>
+          <span
+            style={{ cursor: 'pointer', color: maxDistance === '5' ? 'var(--neon-cyan)' : 'inherit', fontWeight: maxDistance === '5' ? 800 : 500 }}
+            onClick={() => onSelectMaxDistance && onSelectMaxDistance('5')}
+          >
+            5 ק״מ
+          </span>
+          <span
+            style={{ cursor: 'pointer', color: maxDistance === '15' ? 'var(--neon-cyan)' : 'inherit', fontWeight: maxDistance === '15' ? 800 : 500 }}
+            onClick={() => onSelectMaxDistance && onSelectMaxDistance('15')}
+          >
+            15 ק״מ
+          </span>
+          <span
+            style={{ cursor: 'pointer', color: maxDistance === '25' ? 'var(--neon-cyan)' : 'inherit', fontWeight: maxDistance === '25' ? 800 : 500 }}
+            onClick={() => onSelectMaxDistance && onSelectMaxDistance('25')}
+          >
+            25 ק״מ
+          </span>
+          <span
+            style={{ cursor: 'pointer', color: (maxDistance === '40' || maxDistance === 'all') ? 'var(--neon-cyan)' : 'inherit', fontWeight: (maxDistance === '40' || maxDistance === 'all') ? 800 : 500 }}
+            onClick={() => onSelectMaxDistance && onSelectMaxDistance('40')}
+          >
+            40 ק״מ
+          </span>
         </div>
       </div>
 
@@ -708,134 +833,7 @@ export default function FilterBar({
         </div>
       )}
 
-      {/* 4. CITY SELECTOR WITH QUICK SEARCH ACROSS 40+ CITIES */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-          <span style={{ fontSize: '11.5px', color: 'var(--text-muted)', fontWeight: 600 }}>בחר עיר או אזור:</span>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <input
-              type="text"
-              value={citySearchTerm}
-              onChange={(e) => setCitySearchTerm(e.target.value)}
-              placeholder="חיפוש עיר (אשקלון, אשדוד, קריית גת...)"
-              style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '6px',
-                color: 'var(--text-primary)',
-                fontSize: '11px',
-                padding: '3px 8px',
-                width: '190px',
-                outline: 'none',
-                fontFamily: 'var(--font-main)',
-                direction: 'rtl'
-              }}
-            />
-            {citySearchTerm && (
-              <button
-                type="button"
-                onClick={() => setCitySearchTerm('')}
-                style={{
-                  position: 'absolute',
-                  left: 4,
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--text-muted)',
-                  cursor: 'pointer',
-                  padding: 2,
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <X size={11} />
-              </button>
-            )}
-          </div>
-        </div>
 
-        <div
-          className="cities-wrap-container"
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 5,
-            padding: '2px 0',
-            maxHeight: '130px',
-            overflowY: 'auto'
-          }}
-        >
-          {filteredCities.map((city) => {
-            const isActive = activeCityId === city.id;
-            return (
-              <button
-                key={city.id}
-                onClick={() => onSelectCity(city.id)}
-                title={city.name}
-                style={{
-                  background: isActive
-                    ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.95), rgba(99, 102, 241, 0.95))'
-                    : 'rgba(255, 255, 255, 0.04)',
-                  border: isActive ? '1px solid rgba(168, 85, 247, 0.85)' : '1px solid var(--border-subtle)',
-                  color: isActive ? '#fff' : 'var(--text-secondary)',
-                  boxShadow: isActive ? '0 0 14px rgba(168, 85, 247, 0.45)' : 'none',
-                  padding: '4px 10px',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '11.5px',
-                  fontWeight: isActive ? 700 : 500,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                <MapPin size={10.5} color={isActive ? '#fff' : 'var(--neon-cyan)'} />
-                <span>{city.shortName || city.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 5. CATEGORIES & STAR RATING & QUICK TOGGLES */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8
-        }}
-      >
-        {/* Category Pills */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {CATEGORIES.map((cat) => {
-            const Icon = categoryIcons[cat.id] || Sparkles;
-            const isActive = activeCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => onSelectCategory(cat.id)}
-                style={{
-                  background: isActive ? 'rgba(6, 182, 212, 0.2)' : 'rgba(255, 255, 255, 0.03)',
-                  border: isActive ? '1px solid var(--neon-cyan)' : '1px solid var(--border-subtle)',
-                  color: isActive ? 'var(--neon-cyan)' : 'var(--text-secondary)',
-                  padding: '5px 10px',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '11px',
-                  fontWeight: isActive ? 700 : 500,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <Icon size={12} />
-                <span>{cat.label}</span>
-              </button>
-            );
-          })}
-        </div>
 
         {/* 5. SLIDEBARS: דירוג הבר ועלות הבר בעזרת SLIDEBAR */}
         <div
@@ -1012,6 +1010,5 @@ export default function FilterBar({
           </button>
         </div>
       </div>
-    </div>
   );
 }
