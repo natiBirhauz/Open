@@ -14,7 +14,6 @@ import FilterBar from './components/FilterBar';
 import IsraelMap from './components/IsraelMap';
 import VenueCard from './components/VenueCard';
 import VenueDetailModal from './components/VenueDetailModal';
-import MobileNav from './components/MobileNav';
 import { Sparkles, Map, RefreshCw, ChevronDown, Navigation } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -269,22 +268,6 @@ export default function App() {
     setMapTargetVenue(venue);
   };
 
-  // Trigger surprise from mobile nav
-  const handleTriggerMobileSurprise = () => {
-    if (filteredVenues.length === 0) return;
-    const randomPick = filteredVenues[Math.floor(Math.random() * filteredVenues.length)];
-    try {
-      confetti({
-        particleCount: 70,
-        spread: 60,
-        origin: { y: 0.7 },
-        colors: ['#a855f7', '#06b6d4', '#f43f5e']
-      });
-    } catch (e) {}
-    setModalVenue(randomPick);
-    setMapTargetVenue(randomPick);
-  };
-
   // Show venue on map
   const handleShowOnMap = (venue) => {
     setMapTargetVenue(venue);
@@ -533,15 +516,6 @@ export default function App() {
           onClose={() => setModalVenue(null)}
         />
       )}
-
-      {/* Mobile Navigation Bar */}
-      <MobileNav
-        viewMode={viewMode}
-        onChangeViewMode={setViewMode}
-        onlyHot={onlyHot}
-        onToggleOnlyHot={() => setOnlyHot((prev) => !prev)}
-        onTriggerSurprise={handleTriggerMobileSurprise}
-      />
     </div>
   );
 }
