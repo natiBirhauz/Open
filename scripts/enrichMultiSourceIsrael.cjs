@@ -267,7 +267,7 @@ async function runMultiSourceEnrichment() {
                 peakHours: '21:30 - 01:30',
                 hourlyBusyness: isOpen ? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 25, 35, 45, 50, 65, 75, 85, 90, 80, 65, 40, 15] : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 phone: item.phone || '',
-                website: item.url ? (item.url.startsWith('http') ? item.url : `https://easy.co.il${item.url}`) : null,
+                website: `https://www.google.com/search?q=${encodeURIComponent((name + ' ' + cityInfo.nameHe + ' תפריט').trim())}`,
                 wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
                 description: item.snippet || `${name} - מקום בילוי אותנטי ב${cityInfo.nameHe}. חוויה קולינרית ואווירה ייחודית.`,
                 musicTags: ['מיינסטרים', 'ישראלי', 'אקוסטי'],

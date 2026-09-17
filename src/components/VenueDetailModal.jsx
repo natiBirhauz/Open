@@ -475,18 +475,20 @@ export default function VenueDetailModal({
               <span>נווט ב-Waze</span>
             </a>
 
-            {/* Instagram / Web */}
-            {venue.website && (
-              <a
-                href={venue.website}
-                target="_blank"
-                rel="noreferrer"
-                style={{ ...actionButtonStyle, background: 'rgba(168, 85, 247, 0.15)', borderColor: 'rgba(168, 85, 247, 0.35)', color: '#c084fc' }}
-              >
-                <Globe size={16} />
-                <span>אתר / תפריט</span>
-              </a>
-            )}
+            {/* Direct Official Site / Menu */}
+            <a
+              href={
+                venue.website && !venue.website.includes('easy.co.il')
+                  ? venue.website
+                  : `https://www.google.com/search?q=${encodeURIComponent(((venue.nameHe || venue.nameEn || '') + ' ' + (venue.cityNameHe || '') + ' תפריט').trim())}`
+              }
+              target="_blank"
+              rel="noreferrer"
+              style={{ ...actionButtonStyle, background: 'rgba(168, 85, 247, 0.15)', borderColor: 'rgba(168, 85, 247, 0.35)', color: '#c084fc' }}
+            >
+              <Globe size={16} />
+              <span>אתר / תפריט ↗</span>
+            </a>
 
             {/* WhatsApp Share */}
             <button
