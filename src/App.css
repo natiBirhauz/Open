@@ -1,0 +1,353 @@
+/* App Layout Styles - OpenBars Israel */
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  background-color: var(--bg-darkest);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  height: calc(100vh - 68px);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Discovery Feed Column (Side list) */
+.feed-column {
+  width: 500px;
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(9, 12, 19, 0.85);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid var(--border-subtle);
+  z-index: 10;
+  transition: width 0.3s ease;
+}
+
+/* Map Column (Interactive Israel Map) */
+.map-column {
+  flex: 1;
+  height: 100% !important;
+  width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Full Map View Mode */
+.view-map-only .feed-column {
+  display: none !important;
+}
+.view-map-only .map-column {
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+/* Full List View Mode */
+.view-list-only .map-column {
+  display: none !important;
+}
+.view-list-only .feed-column {
+  width: 100% !important;
+  max-width: 900px;
+  margin: 0 auto;
+  border-left: none;
+}
+
+/* Venue Cards Grid */
+.venues-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Spotlight Card Transitions */
+.spotlight-card-wrapper {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease !important;
+}
+
+.spotlight-card-wrapper:hover {
+  transform: translateY(-3px);
+  border-color: rgba(168, 85, 247, 0.45) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), var(--glow-purple) !important;
+}
+
+.spotlight-card-wrapper:hover .venue-card-img {
+  transform: scale(1.05);
+}
+
+.venue-card-selected {
+  border-color: var(--neon-purple) !important;
+  box-shadow: 0 0 24px rgba(168, 85, 247, 0.5) !important;
+}
+
+/* Hebrew OSM Dark Filter */
+.hebrew-dark-osm {
+  filter: brightness(0.7) invert(1) contrast(2) hue-rotate(190deg) saturate(0.4) !important;
+}
+
+/* Regional City Hub Markers */
+.custom-region-hub {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 500 !important;
+}
+
+.custom-region-hub:hover {
+  transform: scale(1.12) translateY(-4px);
+  z-index: 1000 !important;
+}
+
+/* Iconic Star Marker */
+.iconic-star-marker {
+  transition: transform 0.25s ease;
+  z-index: 600 !important;
+}
+.iconic-star-marker:hover {
+  transform: scale(1.25);
+  z-index: 1100 !important;
+}
+
+/* Mini Dot Markers */
+.mini-map-dot {
+  transition: transform 0.2s ease;
+}
+.mini-map-dot:hover {
+  transform: scale(1.5);
+  z-index: 900 !important;
+}
+
+/* Custom Tooltip */
+.custom-tooltip {
+  background: rgba(13, 17, 27, 0.95) !important;
+  border: 1px solid var(--neon-purple) !important;
+  color: #fff !important;
+  font-family: var(--font-main) !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  direction: rtl !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.6) !important;
+}
+
+/* View Mode Switcher Pill in Header */
+.view-mode-pill {
+  display: flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 3px;
+}
+
+.view-mode-pill button {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.view-mode-pill button.active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.9), rgba(99, 102, 241, 0.9));
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(168, 85, 247, 0.4);
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1024px) {
+  .feed-column {
+    width: 440px;
+    padding: 14px 14px 80px;
+  }
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    height: auto;
+    overflow: visible;
+    flex-direction: column;
+  }
+
+  .nav-live-badge,
+  .view-mode-pill,
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .mobile-bottom-nav {
+    display: flex !important;
+  }
+
+  /* On mobile split: Map is at the TOP (height 320px) and feed is below it */
+  .mobile-split .main-content {
+    flex-direction: column-reverse !important;
+    height: auto !important;
+    overflow-y: auto !important;
+  }
+
+  .mobile-split .map-column {
+    width: 100% !important;
+    height: 320px !important;
+    min-height: 300px !important;
+    padding: 0 !important;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  }
+
+  .mobile-split .feed-column {
+    width: 100% !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    border-left: none !important;
+    padding: 14px 14px 110px !important;
+  }
+
+  /* When user selects only Map on mobile */
+  .mobile-map-only .map-column {
+    width: 100%;
+    height: calc(100vh - 120px) !important;
+    min-height: calc(100vh - 120px) !important;
+    padding: 8px 8px 70px;
+    display: flex !important;
+  }
+  .mobile-map-only .feed-column {
+    display: none !important;
+  }
+
+  /* When user selects only List on mobile */
+  .mobile-list-only .map-column {
+    display: none !important;
+  }
+  .mobile-list-only .feed-column {
+    width: 100%;
+    display: flex !important;
+    padding: 12px 12px 100px;
+  }
+
+  /* Modal turns into Bottom Sheet on small screens */
+  .modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal-content {
+    max-height: 85vh !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+}
+
+/* Custom Neon Slidebars (Range Sliders) */
+.custom-slidebar {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-slidebar:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.custom-slidebar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--neon-purple);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px var(--neon-purple), 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.custom-slidebar::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 16px var(--neon-purple);
+}
+
+.custom-slidebar-gold::-webkit-slider-thumb,
+.custom-slidebar-amber::-webkit-slider-thumb {
+  background: #fbbf24;
+  border-color: #ffffff;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.9), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.custom-slidebar-gold::-webkit-slider-thumb:hover,
+.custom-slidebar-amber::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 18px rgba(251, 191, 36, 1);
+}
+
+.custom-slidebar-purple::-webkit-slider-thumb {
+  background: #a855f7;
+  border-color: #ffffff;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.9), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.custom-slidebar-purple::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 18px rgba(168, 85, 247, 1);
+}
+
+.custom-slidebar-cyan::-webkit-slider-thumb {
+  background: var(--neon-cyan);
+  border-color: #ffffff;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.9), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.custom-slidebar-cyan::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 18px rgba(6, 182, 212, 1);
+}
+
