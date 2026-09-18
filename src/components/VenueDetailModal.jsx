@@ -156,7 +156,7 @@ export default function VenueDetailModal({
                 width: 36,
                 height: 36,
                 borderRadius: '50%',
-                background: 'rgba(10, 13, 20, 0.8)',
+                background: 'rgba(10, 13, 20, 0.85)',
                 border: '1px solid var(--border-light)',
                 color: '#fff',
                 display: 'flex',
@@ -169,6 +169,27 @@ export default function VenueDetailModal({
               <X size={18} />
             </button>
 
+            {/* Venue Name in Header Bar */}
+            <div
+              style={{
+                background: 'rgba(10, 13, 20, 0.88)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(168, 85, 247, 0.4)',
+                borderRadius: 'var(--radius-full)',
+                padding: '5px 16px',
+                color: '#fff',
+                fontSize: '13px',
+                fontWeight: 800,
+                maxWidth: '60%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)'
+              }}
+            >
+              {venue.nameHe}
+            </div>
+
             {/* Actions: Favorite & Share */}
             <div style={{ display: 'flex', gap: 8 }}>
               <button
@@ -178,7 +199,7 @@ export default function VenueDetailModal({
                   width: 36,
                   height: 36,
                   borderRadius: '50%',
-                  background: 'rgba(10, 13, 20, 0.8)',
+                  background: 'rgba(10, 13, 20, 0.85)',
                   border: '1px solid var(--border-light)',
                   color: '#22c55e',
                   display: 'flex',
@@ -226,6 +247,90 @@ export default function VenueDetailModal({
 
         {/* Modal Body */}
         <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Prominent Venue Identity Card in Details Body */}
+          <div
+            style={{
+              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%)',
+              border: '1px solid rgba(168, 85, 247, 0.35)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '16px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.35)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span
+                  style={{
+                    background: 'var(--neon-purple)',
+                    color: '#fff',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    padding: '3px 10px',
+                    borderRadius: 'var(--radius-full)',
+                    boxShadow: 'var(--glow-purple)'
+                  }}
+                >
+                  {venue.categoryLabel}
+                </span>
+                <span
+                  style={{
+                    background: 'rgba(6, 182, 212, 0.15)',
+                    border: '1px solid rgba(6, 182, 212, 0.35)',
+                    color: 'var(--neon-cyan)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    padding: '3px 10px',
+                    borderRadius: 'var(--radius-full)'
+                  }}
+                >
+                  📍 {venue.cityNameHe}
+                </span>
+              </div>
+              <span style={{ color: 'var(--neon-amber)', fontSize: '14px', fontWeight: 800 }}>
+                {venue.priceLabel}
+              </span>
+            </div>
+
+            <div>
+              <div style={{ fontSize: '11px', color: 'var(--neon-purple)', fontWeight: 800, letterSpacing: '0.5px', marginBottom: 2 }}>
+                שם המקום:
+              </div>
+              <h1
+                style={{
+                  fontSize: '26px',
+                  fontWeight: 900,
+                  color: '#ffffff',
+                  margin: 0,
+                  lineHeight: 1.25,
+                  letterSpacing: '-0.3px',
+                  textShadow: '0 2px 8px rgba(0,0,0,0.5)'
+                }}
+              >
+                {venue.nameHe}
+              </h1>
+              {venue.nameEn && venue.nameEn !== venue.nameHe && (
+                <div
+                  style={{
+                    fontSize: '14px',
+                    color: '#94a3b8',
+                    fontFamily: 'var(--font-accent)',
+                    fontWeight: 500,
+                    marginTop: 3
+                  }}
+                >
+                  {venue.nameEn}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)', fontSize: '13px', paddingTop: 2 }}>
+              <MapPin size={15} color="var(--neon-cyan)" style={{ flexShrink: 0 }} />
+              <span>{venue.address}</span>
+            </div>
+          </div>
           {/* Quick Stats Bar */}
           <div
             style={{
@@ -338,7 +443,7 @@ export default function VenueDetailModal({
           {/* Description */}
           <div>
             <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--neon-purple)', marginBottom: 6 }}>
-              על המקום והאווירה
+              על {venue.nameHe} והאווירה
             </h4>
             <p style={{ fontSize: '13px', lineHeight: 1.7, color: 'var(--text-secondary)' }}>
               {venue.description}
@@ -440,6 +545,9 @@ export default function VenueDetailModal({
 
           {/* Address and Contact info */}
           <div style={{ padding: '12px 14px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', marginBottom: 4 }}>
+              כתובת ומיקום של {venue.nameHe}
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)', fontSize: '13px' }}>
               <MapPin size={16} color="var(--neon-cyan)" />
               <span>{venue.address}</span>
@@ -480,7 +588,7 @@ export default function VenueDetailModal({
               href={
                 venue.website && !venue.website.includes('easy.co.il')
                   ? venue.website
-                  : `https://www.google.com/search?q=${encodeURIComponent(((venue.nameHe || venue.nameEn || '') + ' ' + (venue.cityNameHe || '') + ' תפריט').trim())}`
+                  : `https://www.google.com/search?q=${encodeURIComponent(((venue.nameHe || venue.nameEn || '') + ' ' + (venue.address || venue.cityNameHe || '') + ' תפריט').trim())}`
               }
               target="_blank"
               rel="noreferrer"

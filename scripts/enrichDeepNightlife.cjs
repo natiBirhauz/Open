@@ -95,7 +95,12 @@ function normalizeCity(cityName, lat, lng) {
   if (c.includes('עפולה') || c.includes('נצרת')) return { city: 'afula', nameHe: 'עפולה ונצרת' };
   if (c.includes('נהריה') || c.includes('עכו')) return { city: 'nahariya', nameHe: 'נהריה ועכו' };
   if (c.includes('מודיעין')) return { city: 'modiin', nameHe: 'מודיעין' };
-  if (c.includes('קריות') || c.includes('מוצקין') || c.includes('ביאליק') || c.includes('אתא')) return { city: 'krayot', nameHe: 'הקריות' };
+  if (
+    (c.includes('קריות') || c.includes('מוצקין') || c.includes('קריית ביאליק') || c.includes('קריית ים') || c.includes('קריית חיים') || c.includes('קריית אתא')) &&
+    (!lat || (lat >= 32.75 && lat <= 32.95))
+  ) {
+    return { city: 'krayot', nameHe: 'הקריות' };
+  }
   
   if (lat && lat > 32.5) return { city: 'north', nameHe: c || 'צפון הארץ' };
   if (lat && lat < 31.6) return { city: 'south', nameHe: c || 'דרום הארץ' };
