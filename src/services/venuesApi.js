@@ -107,11 +107,85 @@ export function isVenueOpenNow(venue) {
  * Merge curated venues with real OSM dataset.
  * Curated venues have priority for photos and verified descriptions.
  */
+/**
+ * Strict sovereign Israeli borders validator.
+ * Excludes non-sovereign/foreign territories:
+ * - Lebanon (Rmeish, Yaroun, Maroun al-Ras, Markaba, Safad El Battikh, Houla, etc.)
+ * - Syria (beyond Golan Alpha Line)
+ * - Jordan (Aqaba, East of Jordan river)
+ * - Egypt (Sinai west of border)
+ * - Gaza Strip
+ * - West Bank (non-sovereign Palestinian territories)
+ */
+export function isStrictlyInsideIsrael(lat, lng) {
+  if (!lat || !lng) return false;
+
+  // 1. NORTHERN BORDER (LEBANON) - STRICT BLUE LINE
+  if (lng < 35.110 && lat > 33.095) return false;
+  if (lng >= 35.110 && lng < 35.250 && lat > 33.088) return false;
+  if (lng >= 35.250 && lng < 35.320 && lat > 33.085) return false;
+  if (lng >= 35.320 && lng < 35.350 && lat > 33.072) return false;
+  if (lng >= 35.350 && lng < 35.450 && lat > 33.055) return false;
+  if (lng >= 35.450 && lng < 35.480 && lat > 33.079) return false;
+  if (lng >= 35.480 && lng < 35.520 && lat > 33.100) return false;
+  if (lng < 35.535 && lat > 33.100) return false;
+  if (lng < 35.540 && lat > 33.230) return false;
+  if (lng < 35.560 && lat > 33.242) return false;
+  if (lng < 35.568 && lat > 33.268) return false;
+  if (lng < 35.700 && lat > 33.285) return false;
+  if (lng >= 35.585 && lng < 35.660 && lat > 33.242) return false;
+  if (lng >= 35.660 && lng < 35.740 && lat > 33.275) return false;
+  if (lng >= 35.740 && lat > 33.315) return false;
+
+  // 2. NORTHEAST BORDER (SYRIA - GOLAN ALPHA LINE)
+  if (lat >= 33.10 && lng > 35.840) return false;
+  if (lat >= 32.85 && lat < 33.10 && lng > 35.860) return false;
+  if (lat >= 32.70 && lat < 32.85 && lng > 35.880) return false;
+
+  // 3. EASTERN BORDER (JORDAN)
+  if (lat >= 32.40 && lat < 32.70 && lng > 35.580) return false;
+  if (lat >= 31.75 && lat < 32.40 && lng > 35.550) return false;
+  if (lat >= 31.05 && lat < 31.75 && lng > 35.450) return false;
+  if (lat >= 30.60 && lat < 31.05 && lng > 35.320) return false;
+  if (lat >= 30.00 && lat < 30.60 && lng > 35.200) return false;
+  if (lat >= 29.55 && lat < 30.00 && lng > 35.030) return false;
+  if (lat < 29.55 && lng > 34.975) return false;
+
+  // 4. SOUTHWEST BORDER (EGYPT / SINAI)
+  if (lat < 29.485) return false;
+  if (lat < 29.56 && lng < 34.885) return false;
+  if (lat >= 29.56 && lat < 30.00 && lng < 34.800) return false;
+  if (lat >= 30.00 && lat < 30.50 && lng < 34.600) return false;
+  if (lat >= 30.50 && lat < 31.00 && lng < 34.400) return false;
+  if (lat >= 31.00 && lat < 31.20 && lng < 34.250) return false;
+
+  // 5. GAZA STRIP
+  if (lat >= 31.250 && lat <= 31.585 && lng <= 34.520) return false;
+
+  // 6. WEST BANK / AREA C
+  const inWestBankBox = (lat >= 31.35 && lat <= 32.48 && lng >= 34.98 && lng <= 35.50);
+  if (inWestBankBox) {
+    const isJerusalem = (lat >= 31.72 && lat <= 31.84 && lng >= 35.15 && lng <= 35.25);
+    const isModiin = (lat >= 31.88 && lat <= 31.93 && lng >= 34.98 && lng <= 35.04);
+    const isBeitShemesh = (lat >= 31.72 && lat <= 31.78 && lng >= 34.96 && lng <= 35.02);
+    if (!isJerusalem && !isModiin && !isBeitShemesh) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Merge curated venues with real OSM dataset.
+ * Curated venues have priority for photos and verified descriptions.
+ */
 export function getInitialVenues() {
   const merged = new Map();
 
-  // 1. Add all real venues from Israel OSM (keyed by unique OSM ID)
+  // 1. Add all real venues from Israel OSM (strictly inside Israel)
   REAL_OSM_VENUES.forEach((osm) => {
+    if (!isStrictlyInsideIsrael(osm.lat, osm.lng)) return;
     const isOpenNow = isVenueOpenNow(osm);
     const liveCrowd = calculateLiveCrowd(osm.id, osm.crowdPercentage || 50, isOpenNow);
     const imageUrl = getVenueImage(osm);
@@ -123,8 +197,9 @@ export function getInitialVenues() {
     });
   });
 
-  // 2. Overlay iconic curated venues with verified descriptions and photos
+  // 2. Overlay iconic curated venues with verified descriptions and photos (strictly inside Israel)
   CURATED_VENUES.forEach((curated) => {
+    if (!isStrictlyInsideIsrael(curated.lat, curated.lng)) return;
     const isOpenNow = isVenueOpenNow(curated);
     const liveCrowd = calculateLiveCrowd(curated.id, curated.crowdPercentage || 75, isOpenNow);
     const imageUrl = getVenueImage(curated);
@@ -309,7 +384,7 @@ out center tags 500;
             const lat = el.lat || el.center?.lat;
             const lng = el.lon || el.center?.lon;
             const name = el.tags?.['name:he'] || el.tags?.name;
-            return lat && lng && name;
+            return lat && lng && name && isStrictlyInsideIsrael(lat, lng);
           })
           .map((el) => {
             const lat = el.lat || el.center?.lat;

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import { Sparkles } from 'lucide-react';
 import { getVenueImage, DEFAULT_NIGHTLIFE_IMAGE } from '../data/venueImages';
-import { reverseGeocodeCoordinates } from '../services/venuesApi';
+import { reverseGeocodeCoordinates, isStrictlyInsideIsrael } from '../services/venuesApi';
 
 // Dedicated Hebrew Dark Map Provider (100% Hebrew streets, no watermarks, sleek night aesthetics)
 const HEBREW_DARK_TILE = {
@@ -246,14 +246,14 @@ export default function IsraelMap({
     const isMediumZoom = zoom >= 12 && zoom <= 13;
     const pinSize = isMediumZoom ? 22 : 36;
 
-    // Filter venues strictly to current map viewport (+25% padding for smooth panning)
+    // Filter venues strictly to current map viewport and strictly inside sovereign Israel
     const mapBounds = map.getBounds();
     const padBounds = mapBounds.pad(0.25);
-    const visibleVenues = venues.filter((v) => v.lat && v.lng && padBounds.contains([v.lat, v.lng]));
+    const visibleVenues = venues.filter((v) => v.lat && v.lng && isStrictlyInsideIsrael(v.lat, v.lng) && padBounds.contains([v.lat, v.lng]));
     const venuesToRender = visibleVenues.slice(0, 500);
 
     venuesToRender.forEach((venue) => {
-      if (!venue.lat || !venue.lng) return;
+      if (!venue.lat || !venue.lng || !isStrictlyInsideIsrael(venue.lat, venue.lng)) return;
 
       const markerColor = categoryColors[venue.category] || '#f59e0b';
 

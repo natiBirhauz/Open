@@ -6,7 +6,8 @@ import {
   fetchLiveOverpassVenues,
   calculateLiveCrowd,
   calculateDistanceKm,
-  formatDistance
+  formatDistance,
+  isStrictlyInsideIsrael
 } from './services/venuesApi';
 import CanvasBackground from './components/CanvasBackground';
 import Navbar from './components/Navbar';
@@ -125,6 +126,10 @@ export default function App() {
   const filteredVenues = useMemo(() => {
     // 1. Filter venues matching all active criteria
     const filtered = allVenues.filter((venue) => {
+      // Strictly enforce Israeli sovereign borders (Rosh HaNikra to Eilat, no foreign/Lebanon/Aqaba pins)
+      if (!isStrictlyInsideIsrael(venue.lat, venue.lng)) {
+        return false;
+      }
 
       // City filter (only applies if userLocation is NOT active and activeCityId !== 'all')
       if (!userLocation && activeCityId !== 'all') {

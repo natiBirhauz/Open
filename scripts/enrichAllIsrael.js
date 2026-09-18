@@ -10,38 +10,56 @@ const OVERPASS_ENDPOINTS = [
 export function isStrictlyInsideIsrael(lat, lng) {
   if (!lat || !lng) return false;
 
-  // 1. LEBANON BORDER
-  if (lng < 35.15 && lat > 33.092) return false; // Rosh HaNikra cutoff (Tyre, Naqoura, Sidon)
-  if (lng >= 35.15 && lng < 35.32 && lat > 33.10) return false;
-  if (lng >= 35.32 && lng < 35.50 && lat > 33.25) return false;
-  if (lng >= 35.50 && lng < 35.62 && lat > 33.285) return false; // Metula cutoff
-  if (lng >= 35.62 && lng < 35.75 && lat > 33.28) return false;
-  if (lng >= 35.75 && lat > 33.32) return false; // Hermon cutoff
+  // 1. NORTHERN BORDER (LEBANON) - STRICT BLUE LINE
+  if (lng < 35.110 && lat > 33.095) return false;
+  if (lng >= 35.110 && lng < 35.250 && lat > 33.088) return false;
+  if (lng >= 35.250 && lng < 35.320 && lat > 33.085) return false;
+  if (lng >= 35.320 && lng < 35.350 && lat > 33.072) return false;
+  if (lng >= 35.350 && lng < 35.450 && lat > 33.055) return false;
+  if (lng >= 35.450 && lng < 35.480 && lat > 33.079) return false;
+  if (lng >= 35.480 && lng < 35.520 && lat > 33.100) return false;
+  if (lng < 35.535 && lat > 33.100) return false;
+  if (lng < 35.540 && lat > 33.230) return false;
+  if (lng < 35.560 && lat > 33.242) return false;
+  if (lng < 35.568 && lat > 33.268) return false;
+  if (lng < 35.700 && lat > 33.285) return false;
+  if (lng >= 35.585 && lng < 35.660 && lat > 33.242) return false;
+  if (lng >= 35.660 && lng < 35.740 && lat > 33.275) return false;
+  if (lng >= 35.740 && lat > 33.315) return false;
 
-  // 2. SYRIA & JORDAN BORDERS
-  if (lat >= 32.70 && lng > 35.88) return false; // Golan east cutoff
-  if (lat >= 32.0 && lat < 32.70 && lng > 35.58) return false; // Jordan River
-  if (lat >= 31.10 && lat < 32.0 && lng > 35.50) return false; // Dead Sea / Judea east
-  if (lat >= 30.60 && lat < 31.10 && lng > 35.35) return false; // North Arava
-  if (lat >= 30.0 && lat < 30.60 && lng > 35.22) return false; // Central Arava
-  if (lat < 30.0 && lng > 35.05) return false; // South Arava / Eilat east
+  // 2. NORTHEAST BORDER (SYRIA - GOLAN ALPHA LINE)
+  if (lat >= 33.10 && lng > 35.840) return false;
+  if (lat >= 32.85 && lat < 33.10 && lng > 35.860) return false;
+  if (lat >= 32.70 && lat < 32.85 && lng > 35.880) return false;
 
-  // 3. EGYPT / SINAI BORDERS
-  if (lat < 29.48) return false; // Eilat south
-  if (lat < 30.0 && lng < 34.88) return false;
-  if (lat >= 30.0 && lat < 31.20 && lng < 34.25) return false;
+  // 3. EASTERN BORDER (JORDAN)
+  if (lat >= 32.40 && lat < 32.70 && lng > 35.580) return false;
+  if (lat >= 31.75 && lat < 32.40 && lng > 35.550) return false;
+  if (lat >= 31.05 && lat < 31.75 && lng > 35.450) return false;
+  if (lat >= 30.60 && lat < 31.05 && lng > 35.320) return false;
+  if (lat >= 30.00 && lat < 30.60 && lng > 35.200) return false;
+  if (lat >= 29.55 && lat < 30.00 && lng > 35.030) return false;
+  if (lat < 29.55 && lng > 34.975) return false;
 
-  // 4. GAZA STRIP
-  if (lat >= 31.18 && lat <= 31.60 && lng <= 34.56) return false;
+  // 4. SOUTHWEST BORDER (EGYPT / SINAI)
+  if (lat < 29.485) return false;
+  if (lat < 29.56 && lng < 34.885) return false;
+  if (lat >= 29.56 && lat < 30.00 && lng < 34.800) return false;
+  if (lat >= 30.00 && lat < 30.50 && lng < 34.600) return false;
+  if (lat >= 30.50 && lat < 31.00 && lng < 34.400) return false;
+  if (lat >= 31.00 && lat < 31.20 && lng < 34.250) return false;
 
-  // 5. WEST BANK / JUDEA & SAMARIA (Exclude Palestinian territory / Area C outside Israeli sovereign borders)
+  // 5. GAZA STRIP
+  if (lat >= 31.250 && lat <= 31.585 && lng <= 34.520) return false;
+
+  // 6. WEST BANK / AREA C
   const inWestBankBox = (lat >= 31.35 && lat <= 32.48 && lng >= 34.98 && lng <= 35.50);
   if (inWestBankBox) {
     const isJerusalem = (lat >= 31.72 && lat <= 31.84 && lng >= 35.15 && lng <= 35.25);
     const isModiin = (lat >= 31.88 && lat <= 31.93 && lng >= 34.98 && lng <= 35.04);
     const isBeitShemesh = (lat >= 31.72 && lat <= 31.78 && lng >= 34.96 && lng <= 35.02);
     if (!isJerusalem && !isModiin && !isBeitShemesh) {
-      return false; // Ramallah, Nablus, Hebron, Bethlehem, Jenin, Jericho, etc.
+      return false;
     }
   }
 
